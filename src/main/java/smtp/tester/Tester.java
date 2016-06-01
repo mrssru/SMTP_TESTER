@@ -22,9 +22,6 @@ public class Tester {
     private static String to;
     private static String username;
     private static String password;
-    private static boolean isNTLM;
-    private static String mechanism;
-    private static String domain;
 
     private static final PropertyUtils UTILS = new PropertyUtils();
     private static void init() {
@@ -37,9 +34,6 @@ public class Tester {
         password = UTILS.getValue("mail.password");
         from = UTILS.getValue("mail.from");
         to = UTILS.getValue("mail.to");
-        isNTLM = UTILS.getBoolean("mail.enable.ntlm");
-        mechanism = UTILS.getValue("mail.smtp.auth.mechanisms");
-        domain = UTILS.getValue("mail.smtp.auth.ntlm.domain");
     }
 
     public static final void main(String[] args) throws MessagingException {
@@ -65,18 +59,16 @@ public class Tester {
         properties.put("mail.smtp.port", port);
         properties.put("mail.smtp.auth", authentication);
         properties.put("mail.smtp.starttls.enable", starttls);
-        properties.put("mail.user", username);
-        properties.put("mail.password", password);
-        if(isNTLM) {
-            properties.put("mail.smtp.auth.mechanisms", mechanism);
-            properties.put("mail.smtp.auth.ntlm.domain", domain);
+        Authenticator auth = null;
+        if(authentication) {
+            properties.put("mail.user", username);
+            properties.put("mail.password", password);
+            auth = new Authenticator() {
+                public PasswordAuthentication getPasswordAuthentication() {
+                    return new PasswordAuthentication(username, password);
+                }
+            };
         }
-
-        Authenticator auth = new Authenticator() {
-            public PasswordAuthentication getPasswordAuthentication() {
-                return new PasswordAuthentication(username, password);
-            }
-        };
 
         return Session.getInstance(properties, auth);
     }
@@ -112,7 +104,13 @@ public class Tester {
     private static void send(Message message, Session mailSession) throws MessagingException {
         SMTPTransport smtpTransport = (SMTPTransport) mailSession.getTransport(protocol);
 
-        smtpTransport.connect(host, username, password);
+        String userName = null;
+        String userPass = null;
+        if(authentication) {
+            userName = username;
+            userPass = password;
+        }
+        smtpTransport.connect(host, userName, userPass);
         smtpTransport.sendMessage(message, message.getAllRecipients());
         smtpTransport.close();
     }
