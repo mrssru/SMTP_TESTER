@@ -58,7 +58,10 @@ public class Tester {
         properties.put("mail.smtp.host", host);
         properties.put("mail.smtp.port", port);
         properties.put("mail.smtp.auth", authentication);
-        properties.put("mail.smtp.starttls.enable", starttls);
+        if(starttls) {
+            properties.put("mail.smtp.starttls.enable", starttls);
+            properties.put("mail.smtp.ssl.trust", host);
+        }
         Authenticator auth = null;
         if(authentication) {
             properties.put("mail.user", username);
