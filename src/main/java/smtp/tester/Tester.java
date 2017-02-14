@@ -18,6 +18,7 @@ public class Tester {
     private static String protocol;
     private static boolean authentication;
     private static boolean starttls;
+    private static boolean ssl;
     private static String from;
     private static String to;
     private static String username;
@@ -30,6 +31,7 @@ public class Tester {
         protocol = UTILS.getValue("email.protocol");
         authentication = UTILS.getBoolean("mail.smtp.auth");
         starttls = UTILS.getBoolean("mail.smtp.starttls.enable");
+        ssl = UTILS.getBoolean("mail.smtp.ssl.enable");
         username = UTILS.getValue("mail.user");
         password = UTILS.getValue("mail.password");
         from = UTILS.getValue("mail.from");
@@ -62,6 +64,11 @@ public class Tester {
             properties.put("mail.smtp.starttls.enable", starttls);
             properties.put("mail.smtp.ssl.trust", host);
         }
+
+        if(ssl) {
+            properties.put("mail.smtp.ssl.enable", ssl);
+        }
+
         Authenticator auth = null;
         if(authentication) {
             properties.put("mail.user", username);
